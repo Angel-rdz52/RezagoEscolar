@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Sílabas</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #contenedor {
+            text-align: center;
+            max-width: 80%;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #007bff;
+        }
+
+        #opciones button {
+            margin: 10px;
+            padding: 15px 30px;
+            font-size: 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            
+        }
+
+        #resultado {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+        
+        footer {
+            margin-top: 75%;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div id="contenedor">
+        <h1>¿Qué sílaba es esta?</h1>
+        <div id="opciones"></div>
+        <p id="resultado"></p>
+        <button id="botonControl" onclick="iniciarJuego();">Iniciar</button>
+    </div>
+
+    <script>
+        var silabas = ['ma', 'me', 'mi', 'mo', 'mu']; // Lista de sílabas fijas
+        var silabaCorrecta; // Sílaba correcta para la pregunta actual
+
+        function iniciarJuego() {
+    // Elige una sílaba al azar como la correcta
+    silabaCorrecta = silabas[Math.floor(Math.random() * silabas.length)];
+
+    // Pregunta al usuario
+    var pregunta = "¿Cuál es la sílaba " + silabaCorrecta + "?";
+
+    // Llena las opciones con las sílabas fijas limitando a 5 opciones
+    var opciones = shuffle(silabas).slice(0, 5);
+
+    // Agrega la opción correcta si no está presente en las primeras 5 sílabas
+    if (!opciones.includes(silabaCorrecta)) {
+        opciones[opciones.length - 1] = silabaCorrecta;
+    }
+
+    // Convierte el texto en voz
+    var mensaje = new SpeechSynthesisUtterance(pregunta);
+    window.speechSynthesis.speak(mensaje);
+
+    // Muestra las opciones
+    document.getElementById("opciones").innerHTML = '';
+    for (var i = 0; i < opciones.length; i++) {
+        var opcion = opciones[i];
+        var boton = document.createElement("button");
+        boton.textContent = opcion;
+        boton.onclick = function() {
+            verificarRespuesta(this.textContent, this);
+        };
+        document.getElementById("opciones").appendChild(boton);
+    }
+
+    // Cambia el texto del botón a "Siguiente"
+    document.getElementById("botonControl").textContent = "Siguiente";
+    document.getElementById("botonControl").style.display = "none";
+}
+
+
+        function verificarRespuesta(respuesta, boton) {
+            boton.disabled = true; // Deshabilita el botón para evitar más clics
+            var mensajeR;
+            if (respuesta === silabaCorrecta) {
+                mensajeR = new SpeechSynthesisUtterance('¡Correcto!. Esta es la sílaba ' + silabaCorrecta);
+                boton.style.backgroundColor = 'green'; // Cambia el color del botón a verde si la respuesta es correcta
+                setTimeout(function() { 
+                iniciarJuego();
+                }, 3000);
+            } else {
+                mensajeR = new SpeechSynthesisUtterance('¡Incorrecto!. Esta no es la sílaba ' + silabaCorrecta);
+                boton.style.backgroundColor = 'red'; // Cambia el color del botón a rojo si la respuesta es incorrecta
+            }
+            window.speechSynthesis.speak(mensajeR);
+        }
+
+        // Función para barajar un array
+        function shuffle(array) {
+            var currentIndex = array.length, temporaryValue, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                temporaryValue = array[currentIndex];
+                array[currentIndex] = array[randomIndex];
+                array[randomIndex] = temporaryValue;
+            }
+            return array;
+        }
+        
+        function cambiarSilabas() {
+    var inputSilabas = document.getElementById("inputSilabas").value;
+    var nuevasSilabas = inputSilabas.split(",").map(function(silaba) {
+        return silaba.trim(); // Eliminar espacios en blanco alrededor de las sílabas
+    });
+
+    // Verificar si hay al menos dos sílabas ingresadas
+    if (nuevasSilabas.length >= 2) {
+        silabas = nuevasSilabas;
+        alert("Sílabas cambiadas correctamente.");
+        document.getElementById("inputSilabas").value="";
+        iniciarJuego();
+    } else {
+        alert("Por favor, ingrese al menos dos sílabas separadas por comas.");
+    }
+}
+    
+        
+    </script>
+    
+    <footer>
+        <input type="text" id="inputSilabas" placeholder="Ingrese las sílabas (separadas por comas)">
+<button onclick="cambiarSilabas()">Cambiar Sílabas</button>
+
+    </footer>
+</body>
+</html>

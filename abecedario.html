@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Letras</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #contenedor {
+            text-align: center;
+            max-width: 80%;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #007bff;
+        }
+
+        #pregunta {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        #opciones button {
+            margin: 10px;
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #resultado {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+    </style>
+    <script src="https://kit.fontawesome.com/4b7cfbaab7.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div id="contenedor">
+        <h1>¿Qué letra es esta?</h1>
+        <div id="pregunta"></div>
+        <div id="opciones"></div>
+        <p id="resultado"></p>
+        <button id="botonControl" onclick="iniciarOSiguienteJuego()">Iniciar</button>
+        
+            <i id="botonRepetir" onclick="Repetir();"  class="fa-solid fa-volume-low" style="color: #0000ff; width: 30px; height: 30px; display: none;"></i>
+            
+    </div>
+
+    <script>
+        // Tu código JavaScript va aquí
+        var letras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']; // Lista de letras para elegir al azar
+        var mensaje;
+        var letraCorrecta; // Letra correcta para la pregunta actual
+
+        function iniciarJuego() {
+            // Elige una letra al azar como la correcta
+            letraCorrecta = letras[Math.floor(Math.random() * letras.length)];
+
+            // Pregunta al usuario
+            
+            if (letraCorrecta === 'Y'){
+            var pregunta = "¿Cuál es la letra Y griega?";} else
+            {
+                var pregunta = "¿Cuál es la letra "+ letraCorrecta +"?";
+            }
+
+            // Pone la letra correcta en una posición aleatoria
+            var posicionCorrecta = Math.floor(Math.random() * 4);
+            var opciones = [];
+
+            // Llena las opciones con la letra correcta y otras letras aleatorias
+            for (var i = 0; i < 4; i++) {
+                if (i === posicionCorrecta) {
+                    opciones.push(letraCorrecta);
+                } else {
+                    var letraAleatoria = letras[Math.floor(Math.random() * letras.length)];
+                    while (opciones.includes(letraAleatoria) || letraAleatoria === letraCorrecta) {
+                        letraAleatoria = letras[Math.floor(Math.random() * letras.length)];
+                    }
+                    opciones.push(letraAleatoria);
+                }
+            }
+
+            // Baraja las opciones aleatoriamente
+            opciones = shuffle(opciones);
+
+            // Convierte el texto en voz
+            mensaje = new SpeechSynthesisUtterance(pregunta);
+            window.speechSynthesis.speak(mensaje);
+
+            // Muestra las opciones
+            document.getElementById("opciones").innerHTML = '';
+            for (var i = 0; i < opciones.length; i++) {
+                var opcion = opciones[i];
+                var boton = document.createElement("button");
+                boton.textContent = opcion;
+                boton.onclick = function() {
+                    verificarRespuesta(this.textContent);
+                };
+                document.getElementById("opciones").appendChild(boton);
+            }
+
+            // Cambia el texto del botón a "Siguiente"
+            document.getElementById("botonControl").textContent = "Siguiente";
+        }
+        
+        
+        
+        
+        function Repetir(){
+            window.speechSynthesis.speak(mensaje);
+        }
+        
+        
+        
+        
+        
+
+        function verificarRespuesta(respuesta) {
+    var botones = document.getElementsByTagName("button");
+
+    for (var i = 0; i < botones.length; i++) {
+        if (botones[i].textContent === respuesta) {
+            if (respuesta === letraCorrecta) {
+                botones[i].style.backgroundColor = "green"; // Cambia a verde si es la respuesta correcta
+                
+                setTimeout(function() { 
+                iniciarJuego();
+                }, 3000);
+                
+            } else {
+                botones[i].style.backgroundColor = "red"; // Cambia a rojo si es la respuesta incorrecta
+                botones[i].disabled = true; // Deshabilita los botones después de seleccionar una respuesta
+            }
+        }
+    }
+        if (letraCorrecta === 'Y' && respuesta === 'Y') {
+        document.getElementById("resultado").textContent = "¡Correcto!";
+        var mensajeR = new SpeechSynthesisUtterance('¡Correcto!. Esta es la letra Y griega.');
+        window.speechSynthesis.speak(mensajeR);
+    } else if (letraCorrecta === 'Y' && respuesta !== 'Y') {
+        document.getElementById("resultado").textContent = "¡Incorrecto!";
+        var mensajeR = new SpeechSynthesisUtterance('¡Incorrecto!. Esta no es la letra Y griega.');
+        window.speechSynthesis.speak(mensajeR);
+    } else if (respuesta === letraCorrecta) {
+        document.getElementById("resultado").textContent = "¡Correcto!";
+        var mensajeR = new SpeechSynthesisUtterance('¡Correcto!. Esta es la letra ' + letraCorrecta);
+        window.speechSynthesis.speak(mensajeR);
+    } else {
+        var mensajeR = new SpeechSynthesisUtterance('¡Incorrecto!. Esta no es la letra ' + letraCorrecta);
+        window.speechSynthesis.speak(mensajeR);
+        document.getElementById("resultado").textContent = "Incorrecto.";
+    } 
+}
+
+        
+        
+        
+        
+        
+
+        // Función para barajar un array
+        function shuffle(array) {
+            var currentIndex = array.length, temporaryValue, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                temporaryValue = array[currentIndex];
+                array[currentIndex] = array[randomIndex];
+                array[randomIndex] = temporaryValue;
+            }
+            return array;
+        }
+        
+        
+        
+        
+
+        function iniciarOSiguienteJuego() {
+        document.getElementById("botonRepetir").style.display = "block";
+        document.getElementById("botonControl").style.display = "none";
+        
+            if (document.getElementById("botonControl").textContent === "Iniciar") {
+                // Iniciar el juego si el botón dice "Iniciar"
+                iniciarJuego();
+            } else {
+                // Siguiente pregunta si el botón dice "Siguiente"
+         
+                iniciarJuego();
+                
+
+            }
+        }
+    </script>
+</body>
+</html>
